@@ -112,7 +112,8 @@ if pendientes_gastos:
     auto_gasto = st.sidebar.selectbox("Auto", opciones_gasto, key="select_gasto")
     desc_gasto = st.sidebar.text_input("Descripción", key="desc_gasto")
     monto_gasto = st.sidebar.number_input("Monto", min_value=0.0, key="monto_gasto")
-    
+    pagador_gasto = st.sidebar.selectbox("¿Quién pagó?", ["Daiana", "Gustavo"], key="pagador_gasto")
+
     if st.sidebar.button("➕ Agregar", key="btn_gasto") and monto_gasto > 0:
         id_auto = int(auto_gasto.split('.')[0])
         for op in st.session_state.data:
@@ -122,9 +123,10 @@ if pendientes_gastos:
                     op['gastos'] = []
                 fecha_gasto = datetime.now().strftime('%d/%m %H:%M')
                 op['gastos'].append({
-                    'fecha': fecha_gasto, 
-                    'desc': desc_gasto, 
-                    'monto': round(monto_gasto, 0)
+                    'fecha': fecha_gasto,
+                    'desc': desc_gasto,
+                    'monto': round(monto_gasto, 0),
+                    'pagador': pagador_gasto
                 })
                 op['costo_total'] += round(monto_gasto, 0)
                 op['inversion_tu'] = round(op['costo_total'] / 2, 0)
@@ -208,21 +210,36 @@ if st.session_state.data:
 
     st.dataframe(display_df.style.apply(color_row, axis=1), use_container_width=True)
 
-    cerradas = df[df['status'] == 'vendido']
-    tu_ganancia = cerradas['tu_ganancia_30'].sum()
-    socio_ganancia = cerradas['socio_ganancia_70'].sum()
-    total_recuperado = cerradas['costo_total'].sum()
+    cerradas = [op for op in st.session_state.data if op['status'] == 'vendido']
+    gan_daiana = sum(op['tu_ganancia_30'] for op in cerradas)
+    gan_gustavo = sum(op['socio_ganancia_70'] for op in cerradas)
+
+    # Gastos pagados por cada uno (solo registros con pagador)
+    gast_daiana = sum(
+        g['monto'] for op in cerradas
+        for g in op.get('gastos', [])
+        if isinstance(g, dict) and g.get('pagador') == 'Daiana'
+    )
+    gast_gustavo = sum(
+        g['monto'] for op in cerradas
+        for g in op.get('gastos', [])
+        if isinstance(g, dict) and g.get('pagador') == 'Gustavo'
+    )
+    inversion_base = sum(op['compra'] / 2 for op in cerradas)
+
+    rec_daiana = inversion_base + gast_daiana + gan_daiana
+    rec_gustavo = inversion_base + gast_gustavo + gan_gustavo
 
     col1, col2 = st.columns(2)
     col3, col4 = st.columns(2)
     with col1:
-        st.metric("💵 TU 30%", f"{simbolo} {tu_ganancia:,.0f}")
+        st.metric("💵 Ganancia Daiana (30%)", f"{simbolo} {gan_daiana:,.0f}")
     with col2:
-        st.metric("👥 SOCIO 70%", f"{simbolo} {socio_ganancia:,.0f}")
+        st.metric("👥 Ganancia Gustavo (70%)", f"{simbolo} {gan_gustavo:,.0f}")
     with col3:
-        st.metric("📈 GANANCIA", f"{simbolo} {tu_ganancia + socio_ganancia:,.0f}")
+        st.metric("🔄 Recupero Daiana", f"{simbolo} {rec_daiana:,.0f}")
     with col4:
-        st.metric("💎 RECUPERADO", f"{simbolo} {total_recuperado:,.0f}")
+        st.metric("🔄 Recupero Gustavo", f"{simbolo} {rec_gustavo:,.0f}")
 
     # DETALLE GASTOS
     st.subheader("📋 Detalle Gastos")
@@ -232,7 +249,8 @@ if st.session_state.data:
             with st.expander(f"{op['id']}. {op['vehiculo']} ({len(op['gastos'])} gastos - {simbolo}{gastos_total:,.0f})"):
                 for gasto in op['gastos']:
                     if isinstance(gasto, dict):
-                        st.write(f"**{gasto['fecha']}** - {gasto['desc']}: {simbolo}{gasto['monto']:,.0f}")
+                        pagador = gasto.get('pagador', '?')
+                        st.write(f"**{gasto['fecha']}** - {gasto['desc']}: {simbolo}{gasto['monto']:,.0f} — pagó **{pagador}**")
 
     st.download_button("📥 Excel", df.to_csv(index=False), f"cuentas_{moneda.replace(' ', '_')}.csv", "text/csv")
 else:
