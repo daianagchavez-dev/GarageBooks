@@ -242,22 +242,19 @@ if st.session_state.data:
     rec_daiana = inversion_base + gast_daiana + gan_daiana
     rec_gustavo = inversion_base + gast_gustavo + gan_gustavo
 
-    def card(icon, label, valor):
-        return f"""
-        <div style="flex:1 1 45%;min-width:130px;background:rgba(255,255,255,0.05);
-                    border-radius:10px;padding:16px 20px;">
-            <div style="font-size:0.8em;color:#aaa;margin-bottom:4px;">{icon} {label}</div>
-            <div style="font-size:1.6em;font-weight:bold;">{simbolo} {valor:,.0f}</div>
-        </div>"""
+    estilo_card = "flex:1 1 45%;min-width:130px;background:rgba(255,255,255,0.05);border-radius:10px;padding:16px 20px;"
+    estilo_label = "font-size:0.8em;color:#aaa;margin-bottom:4px;"
+    estilo_valor = "font-size:1.6em;font-weight:bold;"
 
-    st.markdown(f"""
-    <div style="display:flex;flex-wrap:wrap;gap:12px;margin:16px 0;">
-        {card('💵','Ganancia Dai (30%)', gan_daiana)}
-        {card('👥','Ganancia Gus (70%)', gan_gustavo)}
-        {card('🔄','Recupero Daiana', rec_daiana)}
-        {card('🔄','Recupero Gustavo', rec_gustavo)}
-    </div>
-    """, unsafe_allow_html=True)
+    html_counters = (
+        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin:16px 0;">'
+        f'<div style="{estilo_card}"><div style="{estilo_label}">💵 Ganancia Dai (30%)</div><div style="{estilo_valor}">{simbolo} {gan_daiana:,.0f}</div></div>'
+        f'<div style="{estilo_card}"><div style="{estilo_label}">👥 Ganancia Gus (70%)</div><div style="{estilo_valor}">{simbolo} {gan_gustavo:,.0f}</div></div>'
+        f'<div style="{estilo_card}"><div style="{estilo_label}">🔄 Recupero Daiana</div><div style="{estilo_valor}">{simbolo} {rec_daiana:,.0f}</div></div>'
+        f'<div style="{estilo_card}"><div style="{estilo_label}">🔄 Recupero Gustavo</div><div style="{estilo_valor}">{simbolo} {rec_gustavo:,.0f}</div></div>'
+        '</div>'
+    )
+    st.markdown(html_counters, unsafe_allow_html=True)
 
     # DETALLE GASTOS
     st.subheader("📋 Detalle Gastos")
