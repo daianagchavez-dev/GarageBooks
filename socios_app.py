@@ -5,8 +5,8 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 
-st.set_page_config(page_title="AutoSplit", layout="wide")
-st.title("🚗 AutoSplit")
+st.set_page_config(page_title="GarageBooks", layout="wide")
+st.title("📒 GarageBooks")
 
 SHEET_HEADERS = [
     'id', 'vehiculo', 'fecha_compra', 'compra', 'gastos',
