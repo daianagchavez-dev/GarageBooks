@@ -208,7 +208,7 @@ if st.session_state.data:
         )
 
     # Formato numérico: 2 decimales
-    num_cols = ['Compra', 'Gastos', 'Costo Total', 'Venta', 'Ganancia', 'Vos (30%)', 'Socio (70%)']
+    num_cols = ['Compra', 'Gastos', 'Costo Total', 'Venta', 'Ganancia', 'Dai (30%)', 'Gus (70%)']
     for c in num_cols:
         display_df[c] = pd.to_numeric(display_df[c], errors='coerce').round(2)
 
