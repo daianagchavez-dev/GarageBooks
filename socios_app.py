@@ -5,8 +5,8 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 
-st.set_page_config(page_title="Cuentas Socios Autos PRO v3.4", layout="wide")
-st.title("🚗 Cuentas Claras PRO v3.4")
+st.set_page_config(page_title="AutoSplit", layout="wide")
+st.title("🚗 AutoSplit")
 
 SHEET_HEADERS = [
     'id', 'vehiculo', 'fecha_compra', 'compra', 'gastos',
@@ -173,7 +173,7 @@ if st.session_state.data:
         st.rerun()
 
 # 📊 DASHBOARD
-st.header(f"📊 Historial ({moneda})")
+st.header(f"📋 Registro de Operaciones ({moneda})")
 if st.session_state.data:
     # FIX DEFINITIVO: Función segura
     def get_gastos_total(gastos):
@@ -213,7 +213,8 @@ if st.session_state.data:
     socio_ganancia = cerradas['socio_ganancia_70'].sum()
     total_recuperado = cerradas['costo_total'].sum()
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
+    col3, col4 = st.columns(2)
     with col1:
         st.metric("💵 TU 30%", f"{simbolo} {tu_ganancia:,.0f}")
     with col2:
