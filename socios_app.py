@@ -160,6 +160,22 @@ if pendientes_venta:
         st.sidebar.success(f"💰 Ganancia {simbolo}{ganancia:,.0f}")
         st.rerun()
 
+# ✅ LIQUIDAR
+st.sidebar.header("✅ Liquidar")
+vendidos_liq = [op for op in st.session_state.data if op['status'] == 'vendido']
+if vendidos_liq:
+    opciones_liq = [f"{op['id']}. {op['vehiculo']} ({simbolo}{op['ganancia']:,.0f} gan.)" for op in vendidos_liq]
+    auto_liq = st.sidebar.selectbox("Auto vendido", opciones_liq, key="select_liq")
+    if st.sidebar.button("✅ Marcar liquidado", key="btn_liq"):
+        id_liq = int(auto_liq.split('.')[0])
+        for op in st.session_state.data:
+            if op['id'] == id_liq:
+                op['status'] = 'liquidado'
+                break
+        save_data(st.session_state.data)
+        st.sidebar.success("✅ Liquidado")
+        st.rerun()
+
 # 🗑️ ELIMINAR
 st.sidebar.header("🗑️ Eliminar")
 if st.session_state.data:
@@ -213,7 +229,9 @@ if st.session_state.data:
         display_df[c] = pd.to_numeric(display_df[c], errors='coerce').round(2)
 
     def color_row(row):
-        if row['Estado'] == 'vendido':
+        if row['Estado'] == 'liquidado':
+            c = 'rgba(150,150,150,0.10)'
+        elif row['Estado'] == 'vendido':
             c = 'rgba(0,180,0,0.13)' if row['Ganancia'] >= 0 else 'rgba(200,0,0,0.18)'
         else:
             c = 'rgba(255,190,0,0.10)'
@@ -222,7 +240,7 @@ if st.session_state.data:
     fmt = {c: '{:,.2f}' for c in ['Compra', 'Gastos', 'Costo Total', 'Venta', 'Ganancia', 'Dai (30%)', 'Gus (70%)']}
     st.dataframe(display_df.style.apply(color_row, axis=1).format(fmt, na_rep='—'), use_container_width=True)
 
-    cerradas = [op for op in st.session_state.data if op['status'] == 'vendido']
+    cerradas = [op for op in st.session_state.data if op['status'] == 'vendido']  # solo vendido, no liquidado
     gan_daiana = sum(op['tu_ganancia_30'] for op in cerradas)
     gan_gustavo = sum(op['socio_ganancia_70'] for op in cerradas)
 
